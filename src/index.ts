@@ -21,7 +21,6 @@ app.post(
   '/getOauthToken',
   wrap(async (req, res) => {
     const data = await getOauthToken()
-    res.send(data)
     if (data.oauthToken && data.oauthTokenSecret) {
       res.send(data)
     } else {
@@ -57,10 +56,6 @@ app.post(
     }
   })
 )
-
-app.use('/', (req, res) => {
-  res.send('start')
-})
 
 app.use((err, req, res, next) => {
   console.error(err.stack)
