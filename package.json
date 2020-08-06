@@ -4,6 +4,7 @@
   "description": "twcl middleware",
   "main": "lib/index.js",
   "scripts": {
+    "build": "tsc",
     "start": "tsc -w",
     "serve": "nodemon ./lib"
   },
