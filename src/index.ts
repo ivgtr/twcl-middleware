@@ -35,7 +35,7 @@ app.post(
 
 app.post(
   '/getAccessToken',
-  wrap(async (req, res) => {
+  wrap(async (req, res, next) => {
     const {
       oauth_token: oauthToken,
       oauth_token_secret: oauthTokenSecret,
@@ -60,30 +60,29 @@ app.post(
 
 app.post(
   '/postTweet',
-  wrap(async (req, res) => {
+  wrap(async (req, res, next) => {
     const {
       access_token: accessToken,
       access_token_secret: accessTokenSecret,
       tweet
     } = req.body
-
-    const result = await postTweet(accessToken, accessTokenSecret, tweet)
-    console.log('result start')
-    console.log('result:', result)
-    if (result) {
-      console.log('ok')
-      res.send(result)
-    } else {
+    try {
+      const result = await postTweet(accessToken, accessTokenSecret, tweet)
+      if (result) {
+        console.log('ok')
+        console.log(result)
+        res.send(result)
+      }
+    } catch (err) {
       console.log('no')
-      const err = new Error('Error: 不明なエラー')
-      res.status(400).send({ error: err })
+      next(err)
     }
   })
 )
 
 app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).send('Internal Server Error')
+  console.log(err)
+  res.status(err.status || 500).send({ error: err })
 })
 
 app.listen(port, () => {

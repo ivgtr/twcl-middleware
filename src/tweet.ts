@@ -1,10 +1,14 @@
 import Twitter from 'twitter'
 
+interface ResponseError extends Error {
+  status?: number
+}
+
 const postTweet = async (
   accessToken: string,
   accessTokenSecret: string,
   tweet: string
-): Promise<boolean> => {
+): Promise<any> => {
   const client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
     consumer_secret: process.env.TWITTER_CONSUMER_SECRET_KEY,
@@ -12,22 +16,19 @@ const postTweet = async (
     access_token_secret: accessTokenSecret
   })
 
-  const result = await client.post(
-    'statuses/update',
-    { status: tweet },
-    (error) => {
-      if (!error) {
+  return new Promise((resolve, reject) => {
+    client
+      .post('statuses/update', { status: tweet })
+      .then((data) => {
         console.log(`tweet success: ${tweet}`)
-        return true
-      }
-      console.log(error)
-      return false
-    }
-  )
-  if (result) {
-    return true
-  }
-  return false
+        return resolve(data)
+      })
+      .catch((err) => {
+        const error: ResponseError = new Error(err[0])
+        error.status = 401
+        reject(error)
+      })
+  })
 }
 
 export default postTweet
