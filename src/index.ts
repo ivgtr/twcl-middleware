@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import { getOauthToken, getAccessToken } from './oauth'
+import postTweet from './tweet'
 
 const port = process.env.PORT || 5000
 
@@ -52,6 +53,29 @@ app.post(
       const err = new Error(
         'Error: 入力されたトークンに問題があるようです...もう一度最初から入力してください。'
       )
+      res.status(400).send({ error: err })
+    }
+  })
+)
+
+app.post(
+  '/postTweet',
+  wrap(async (req, res) => {
+    const {
+      access_token: accessToken,
+      access_token_secret: accessTokenSecret,
+      tweet
+    } = req.body
+
+    const result = await postTweet(accessToken, accessTokenSecret, tweet)
+    console.log('result start')
+    console.log('result:', result)
+    if (result) {
+      console.log('ok')
+      res.send(result)
+    } else {
+      console.log('no')
+      const err = new Error('Error: 不明なエラー')
       res.status(400).send({ error: err })
     }
   })
