@@ -4,8 +4,9 @@
   "description": "twcl middleware",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
     "start": "tsc -w",
+    "prebuild": "rimraf lib",
+    "build": "tsc",
     "serve": "nodemon ./lib"
   },
   "repository": {
@@ -24,6 +25,7 @@
     "eslint": "^7.6.0",
     "eslint-config-metamo": "^0.2.6",
     "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
     "typescript": "^3.9.7"
   },
   "dependencies": {
@@ -33,6 +35,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "nodemon": "^2.0.4",
-    "oauth-1.0a": "^2.2.6"
+    "oauth-1.0a": "^2.2.6",
+    "twitter": "^1.7.1"
   }
 }
