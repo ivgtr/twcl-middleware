@@ -1,4 +1,7 @@
 import Twitter from 'twitter'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 interface ResponseError extends Error {
   status?: number

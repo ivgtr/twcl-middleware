@@ -1,8 +1,8 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import { nextTick } from 'process'
 import { getOauthToken, getAccessToken } from './oauth'
 import postTweet from './tweet'
+import getTimeline from './timeline'
 
 const port = process.env.PORT || 5000
 
@@ -69,6 +69,26 @@ app.post(
     } = req.body
     try {
       const result = await postTweet(accessToken, accessTokenSecret, tweet)
+      if (result) {
+        console.log('ok')
+        res.send(result)
+      }
+    } catch (err) {
+      next(err)
+    }
+  })
+)
+
+app.post(
+  '/getTimeline',
+  wrap(async (req, res, next) => {
+    const {
+      access_token: accessToken,
+      access_token_secret: accessTokenSecret,
+      user
+    } = req.body
+    try {
+      const result = await getTimeline(accessToken, accessTokenSecret, user)
       if (result) {
         console.log('ok')
         res.send(result)
