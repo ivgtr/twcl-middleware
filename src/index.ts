@@ -1,5 +1,6 @@
 import express from 'express'
 import bodyParser from 'body-parser'
+import { nextTick } from 'process'
 import { getOauthToken, getAccessToken } from './oauth'
 import postTweet from './tweet'
 
@@ -20,15 +21,15 @@ const wrap = (fn) => (...args) => fn(...args).catch(args[2])
 
 app.post(
   '/getOauthToken',
-  wrap(async (req, res) => {
+  wrap(async (req, res, next) => {
     const data = await getOauthToken()
     if (data.oauthToken && data.oauthTokenSecret) {
       res.send(data)
     } else {
       const err = new Error(
-        'Error: Twitter APIに問題があるようです・・・時間を空けてからもう一度試してみてください。'
+        'Twitter APIに問題があるようです・・・時間を空けてからもう一度試してみてください。'
       )
-      res.status(400).send({ error: err })
+      next(err)
     }
   })
 )
@@ -51,9 +52,9 @@ app.post(
       res.send(data)
     } else {
       const err = new Error(
-        'Error: 入力されたトークンに問題があるようです...もう一度最初から入力してください。'
+        '入力されたトークンに問題があるようです...もう一度最初から入力してください。'
       )
-      res.status(400).send({ error: err })
+      next(err)
     }
   })
 )
@@ -70,18 +71,15 @@ app.post(
       const result = await postTweet(accessToken, accessTokenSecret, tweet)
       if (result) {
         console.log('ok')
-        console.log(result)
         res.send(result)
       }
     } catch (err) {
-      console.log('no')
       next(err)
     }
   })
 )
 
 app.use((err, req, res, next) => {
-  console.log(err)
   res.status(err.status || 500).send({ error: err })
 })
 

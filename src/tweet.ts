@@ -25,7 +25,7 @@ const postTweet = async (
       })
       .catch((err) => {
         const error: ResponseError = new Error(err[0])
-        error.status = 401
+        error.status = 501
         reject(error)
       })
   })
