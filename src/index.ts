@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 import { getOauthToken, getAccessToken } from './oauth'
 import postTweet from './tweet'
 import getTimeline from './timeline'
+import getList from './list'
 
 const port = process.env.PORT || 5000
 
@@ -48,7 +49,7 @@ app.post(
       oauthTokenSecret,
       oauthVerifier
     )
-    if (data.accessToken && data.accessTokenSecret) {
+    if (data.accessToken && data.accessTokenSecret && data.id) {
       res.send(data)
     } else {
       const err = new Error(
@@ -89,6 +90,26 @@ app.post(
     } = req.body
     try {
       const result = await getTimeline(accessToken, accessTokenSecret, user)
+      if (result) {
+        console.log('ok')
+        res.send(result)
+      }
+    } catch (err) {
+      next(err)
+    }
+  })
+)
+
+app.post(
+  '/getList',
+  wrap(async (req, res, next) => {
+    const {
+      access_token: accessToken,
+      access_token_secret: accessTokenSecret,
+      options
+    } = req.body
+    try {
+      const result = await getList(accessToken, accessTokenSecret, options)
       if (result) {
         console.log('ok')
         res.send(result)
