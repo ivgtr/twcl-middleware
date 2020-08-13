@@ -2,8 +2,13 @@ import axios from 'axios'
 import crypto from 'crypto'
 import OAuth, { RequestOptions, Options } from 'oauth-1.0a'
 import dotenv from 'dotenv'
+import getProfile from './profile'
 
 dotenv.config()
+
+interface ResponseError extends Error {
+  status?: number
+}
 
 const oauthUrl = 'https://api.twitter.com/oauth'
 const callbackUrl = 'https://oauth.ivgtr.me/oauthTwitterRedirect'
@@ -65,6 +70,7 @@ export const getAccessToken = async (
 ): Promise<{
   accessToken: string
   accessTokenSecret: string
+  id: number
 }> => {
   const requestData: RequestOptions = {
     url: `${oauthUrl}/access_token`,
@@ -89,11 +95,11 @@ export const getAccessToken = async (
     const accessToken: string = responce.data.split('&')[0].split('=')[1]
     const accessTokenSecret: string = responce.data.split('&')[1].split('=')[1]
 
-    return { accessToken, accessTokenSecret }
+    const id: number = await getProfile(accessToken, accessTokenSecret)
+    return { accessToken, accessTokenSecret, id }
   } catch (err) {
-    return {
-      accessToken: '',
-      accessTokenSecret: ''
-    }
+    const error: ResponseError = new Error(err[0])
+    error.status = 501
+    throw error
   }
 }
