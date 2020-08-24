@@ -20,28 +20,35 @@ const getTimeline = async (
   })
 
   if (user) {
-    return new Promise((resolve, reject) => {
-      const params = { user_id: user, count: 10 }
-      client
-        .get('statuses/user_timeline', params)
-        .then((result) => {
-          console.log('get userTimeline')
-          const shap = result.map((data) => {
-            return {
-              id: `@${data.user.screen_name}`,
-              name: data.user.name,
-              text: data.text
-            }
-          })
+    try {
+      const success = await new Promise((resolve, reject) => {
+        const params = { screen_name: user, count: 10 }
+        client
+          .get('statuses/user_timeline', params)
+          .then((result) => {
+            console.log('get userTimeline')
+            const shap = result.map((data) => {
+              return {
+                id: `@${data.user.screen_name}`,
+                name: data.user.name,
+                text: data.text
+              }
+            })
 
-          return resolve(shap)
-        })
-        .catch((err) => {
-          const error: ResponseError = new Error(err[0])
-          error.status = 501
-          reject(error)
-        })
-    })
+            return resolve(shap)
+          })
+          .catch((err) => {
+            const error: ResponseError = new Error(err[0].message)
+            error.status = err[0].code
+            reject(error)
+          })
+      })
+      return success
+    } catch (err) {
+      const error: ResponseError = new Error(err[0].message)
+      error.status = err[0].code
+      throw error
+    }
   }
   return new Promise((resolve, reject) => {
     const params = { count: 10 }
