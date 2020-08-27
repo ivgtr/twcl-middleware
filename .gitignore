@@ -10,5 +10,3 @@ npm-debug.log*
 # dotenv environment variables file
 .env
 .env.*
-**/configs/*.json
-**/configs/*.db
