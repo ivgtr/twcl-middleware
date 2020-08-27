@@ -56,10 +56,11 @@ export const getOauthToken = async (): Promise<{
       oauthTokenSecret
     }
   } catch (err) {
-    return {
-      oauthToken: '',
-      oauthTokenSecret: ''
-    }
+    const error: ResponseError = new Error(
+      'Twitter APIに問題があります...少し時間を空けてからもう一度試してみてください'
+    )
+    error.status = 403
+    throw error
   }
 }
 
@@ -98,8 +99,8 @@ export const getAccessToken = async (
     const id: number = await getProfile(accessToken, accessTokenSecret)
     return { accessToken, accessTokenSecret, id }
   } catch (err) {
-    const error: ResponseError = new Error(err[0])
-    error.status = 501
+    const error: ResponseError = new Error('入力されたトークンに問題があります')
+    error.status = 401
     throw error
   }
 }

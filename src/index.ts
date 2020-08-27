@@ -23,13 +23,10 @@ const wrap = (fn) => (...args) => fn(...args).catch(args[2])
 app.post(
   '/getOauthToken',
   wrap(async (req, res, next) => {
-    const data = await getOauthToken()
-    if (data.oauthToken && data.oauthTokenSecret) {
+    try {
+      const data = await getOauthToken()
       res.send(data)
-    } else {
-      const err = new Error(
-        'Twitter APIに問題があるようです・・・時間を空けてからもう一度試してみてください。'
-      )
+    } catch (err) {
       next(err)
     }
   })
@@ -44,17 +41,14 @@ app.post(
       oauth_verifier: oauthVerifier
     } = req.body
 
-    const data = await getAccessToken(
-      oauthToken,
-      oauthTokenSecret,
-      oauthVerifier
-    )
-    if (data.accessToken && data.accessTokenSecret && data.id) {
-      res.send(data)
-    } else {
-      const err = new Error(
-        '入力されたトークンに問題があるようです...もう一度最初から入力してください。'
+    try {
+      const data = await getAccessToken(
+        oauthToken,
+        oauthTokenSecret,
+        oauthVerifier
       )
+      res.send(data)
+    } catch (err) {
       next(err)
     }
   })
@@ -71,7 +65,6 @@ app.post(
     try {
       const result = await postTweet(accessToken, accessTokenSecret, tweet)
       if (result) {
-        console.log('ok')
         res.send(result)
       }
     } catch (err) {
@@ -91,7 +84,6 @@ app.post(
     try {
       const result = await getTimeline(accessToken, accessTokenSecret, user)
       if (result) {
-        console.log('ok')
         res.send(result)
       }
     } catch (err) {
@@ -111,7 +103,6 @@ app.post(
     try {
       const result = await getList(accessToken, accessTokenSecret, options)
       if (result) {
-        console.log('ok')
         res.send(result)
       }
     } catch (err) {
@@ -121,7 +112,7 @@ app.post(
 )
 
 app.use((err, req, res, next) => {
-  res.status(err.status || 500).send({ error: err })
+  res.status(err.status || 500).send({ msg: err.message })
 })
 
 app.listen(port, () => {

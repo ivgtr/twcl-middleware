@@ -1,5 +1,6 @@
 import Twitter from 'twitter'
 import dotenv from 'dotenv'
+import errorText from './error'
 
 dotenv.config()
 
@@ -20,8 +21,8 @@ const getParms = (options: {
       count: 10
     }
   }
-  const error: ResponseError = new Error('Error: 不明なエラー')
-  error.status = 501
+  const error: ResponseError = new Error('不正なリクエストです')
+  error.status = 401
   throw error
 }
 
@@ -39,63 +40,71 @@ const getList = async (
     access_token_key: accessToken,
     access_token_secret: accessTokenSecret
   })
-  try {
-    if (options.userid) {
-      return new Promise((resolve, reject) => {
-        const parms = {
-          user_id: options.userid
-        }
-        client
-          .get('lists/list', parms)
-          .then((result) => {
-            const shap: {
-              id: string
-              neme: string
-              text: string
-            }[] = result.map((data) => {
-              return {
-                id: data.id_str,
-                name: data.name,
-                description: data.description
-              }
-            })
-            return resolve(shap)
-          })
-          .catch((err) => {
-            console.error(err)
-            const error: ResponseError = new Error(err[0])
-            error.status = 501
-            reject(error)
-          })
-      })
-    }
-    const parms = getParms(options)
+
+  if (options.userid) {
     return new Promise((resolve, reject) => {
+      const parms = {
+        user_id: options.userid
+      }
       client
-        .get('lists/statuses', parms)
+        .get('lists/list', parms)
         .then((result) => {
-          const shap: { id: string; neme: string; text: string }[] = result.map(
-            (data) => {
-              return {
-                id: `@${data.user.screen_name}`,
-                name: data.user.name,
-                text: data.text
-              }
+          const shap: {
+            id: string
+            neme: string
+            text: string
+          }[] = result.map((data) => {
+            return {
+              id: data.id_str,
+              name: data.name,
+              description: data.description
             }
-          )
+          })
           return resolve(shap)
         })
-        .catch((err) => {
-          console.log(err)
-
-          const error: ResponseError = new Error(err[0])
-          error.status = 501
-          reject(error)
+        .catch(async (err) => {
+          if (typeof err[0].code === 'number') {
+            const error: ResponseError = new Error(await errorText(err[0].code))
+            reject(error)
+          } else {
+            const error: ResponseError = new Error(
+              '不明なエラー...時間を空けてから再度試してみてしてみてください'
+            )
+            error.status = 403
+            reject(error)
+          }
         })
     })
-  } catch (err) {
-    throw new Error(err)
   }
+  const parms = getParms(options)
+  return new Promise((resolve, reject) => {
+    client
+      .get('lists/statuses', parms)
+      .then((result) => {
+        const shap: { id: string; neme: string; text: string }[] = result.map(
+          (data) => {
+            return {
+              id: `@${data.user.screen_name}`,
+              name: data.user.name,
+              text: data.text
+            }
+          }
+        )
+        return resolve(shap)
+      })
+      .catch(async (err) => {
+        if (typeof err[0].code === 'number') {
+          const error: ResponseError = new Error(await errorText(err[0].code))
+          reject(error)
+        } else {
+          const error: ResponseError = new Error(
+            '不明なエラー...時間を空けてから再度試してみてしてみてください'
+          )
+          error.status = 403
+          reject(error)
+        }
+      })
+  })
 }
 
 export default getList

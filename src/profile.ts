@@ -1,5 +1,6 @@
 import Twitter from 'twitter'
 import dotenv from 'dotenv'
+import errorText from './error'
 
 dotenv.config()
 
@@ -25,10 +26,17 @@ const getTweet = async (
       .then((result) => {
         return resolve(result)
       })
-      .catch((err) => {
-        const error: ResponseError = new Error(err[0])
-        error.status = 501
-        reject(error)
+      .catch(async (err) => {
+        if (typeof err[0].code === 'number') {
+          const error: ResponseError = new Error(await errorText(err[0].code))
+          reject(error)
+        } else {
+          const error: ResponseError = new Error(
+            '不明なエラー...時間を空けてから再度試してみてしてみてください'
+          )
+          error.status = 403
+          reject(error)
+        }
       })
   })
   return id
