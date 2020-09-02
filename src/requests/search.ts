@@ -31,9 +31,12 @@ const getSearch = async (
         const { statuses } = result
         const shap = statuses.map((data) => {
           return {
+            time: data.created_at,
             id: `@${data.user.screen_name}`,
             name: data.user.name,
-            text: data.text
+            text: data.text,
+            retweet: data.retweet_count,
+            favorite: data.favorite_count
           }
         })
 

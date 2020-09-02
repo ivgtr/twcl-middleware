@@ -31,9 +31,12 @@ const getTimeline = async (
           console.log('get userTimeline')
           const shap = result.map((data) => {
             return {
+              time: data.created_at,
               id: `@${data.user.screen_name}`,
               name: data.user.name,
-              text: data.text
+              text: data.text,
+              retweet: data.retweet_count,
+              favorite: data.favorite_count
             }
           })
 
@@ -60,11 +63,15 @@ const getTimeline = async (
       .get('statuses/home_timeline', params)
       .then((result) => {
         console.log('get homeTimeline')
+
         const shap = result.map((data) => {
           return {
+            time: data.created_at,
             id: `@${data.user.screen_name}`,
             name: data.user.name,
-            text: data.text
+            text: data.text,
+            retweet: data.retweet_count,
+            favorite: data.favorite_count
           }
         })
 
