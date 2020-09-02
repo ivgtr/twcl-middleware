@@ -79,10 +79,16 @@ app.post(
     const {
       access_token: accessToken,
       access_token_secret: accessTokenSecret,
-      user
+      user,
+      num
     } = req.body
     try {
-      const result = await getTimeline(accessToken, accessTokenSecret, user)
+      const result = await getTimeline(
+        accessToken,
+        accessTokenSecret,
+        user,
+        num
+      )
       if (result) {
         res.send(result)
       }
@@ -98,10 +104,11 @@ app.post(
     const {
       access_token: accessToken,
       access_token_secret: accessTokenSecret,
-      options
+      options,
+      num
     } = req.body
     try {
-      const result = await getList(accessToken, accessTokenSecret, options)
+      const result = await getList(accessToken, accessTokenSecret, options, num)
       if (result) {
         res.send(result)
       }

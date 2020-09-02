@@ -11,7 +11,8 @@ interface ResponseError extends Error {
 const getTimeline = async (
   accessToken: string,
   accessTokenSecret: string,
-  user: string
+  user: string,
+  num: number
 ): Promise<any> => {
   const client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -19,10 +20,11 @@ const getTimeline = async (
     access_token_key: accessToken,
     access_token_secret: accessTokenSecret
   })
+  const n = num > 100 ? 100 : num
 
   if (user) {
     const success = await new Promise((resolve, reject) => {
-      const params = { screen_name: user, count: 10 }
+      const params = { screen_name: user, count: n }
       client
         .get('statuses/user_timeline', params)
         .then((result) => {
@@ -53,7 +55,7 @@ const getTimeline = async (
     return success
   }
   return new Promise((resolve, reject) => {
-    const params = { count: 10 }
+    const params = { count: n }
     client
       .get('statuses/home_timeline', params)
       .then((result) => {

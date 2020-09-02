@@ -8,17 +8,21 @@ interface ResponseError extends Error {
   status?: number
 }
 
-const getParms = (options: {
-  userid?: string
-  listid?: string
-}): {
+const getParms = (
+  options: {
+    userid?: string
+    listid?: string
+  },
+  num: number
+): {
   list_id?: string // eslint-disable-line camelcase
   count: number
 } => {
   if (options.listid) {
+    const n = num > 100 ? 100 : num
     return {
       list_id: options.listid,
-      count: 10
+      count: n
     }
   }
   const error: ResponseError = new Error('不正なリクエストです')
@@ -32,7 +36,8 @@ const getList = async (
   options: {
     userid?: string
     listid?: string
-  }
+  },
+  num: number
 ): Promise<{ id: string; neme: string; text: string }[]> => {
   const client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -76,7 +81,7 @@ const getList = async (
         })
     })
   }
-  const parms = getParms(options)
+  const parms = getParms(options, num)
   return new Promise((resolve, reject) => {
     client
       .get('lists/statuses', parms)
