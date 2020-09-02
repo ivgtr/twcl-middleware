@@ -1,9 +1,13 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import { getOauthToken, getAccessToken } from './oauth'
-import postTweet from './tweet'
-import getTimeline from './timeline'
-import getList from './list'
+import {
+  getOauthToken,
+  getAccessToken,
+  postTweet,
+  getTimeline,
+  getSearch,
+  getList
+} from './requests'
 
 const port = process.env.PORT || 5000
 
@@ -89,6 +93,26 @@ app.post(
         user,
         num
       )
+      if (result) {
+        res.send(result)
+      }
+    } catch (err) {
+      next(err)
+    }
+  })
+)
+
+app.post(
+  '/getSearch',
+  wrap(async (req, res, next) => {
+    const {
+      access_token: accessToken,
+      access_token_secret: accessTokenSecret,
+      q,
+      num
+    } = req.body
+    try {
+      const result = await getSearch(accessToken, accessTokenSecret, q, num)
       if (result) {
         res.send(result)
       }
